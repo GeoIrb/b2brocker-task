@@ -6,9 +6,7 @@ import (
 )
 
 // Service load
-type Service struct {
-	sendBack func(ctx context.Context, requestUUID string) error
-}
+type Service struct{}
 
 // Handler to requests
 func (s *Service) Handler(ctx context.Context, requestUUID string) (err error) {
@@ -17,15 +15,10 @@ func (s *Service) Handler(ctx context.Context, requestUUID string) (err error) {
 		timeout += time.Duration(s)
 	}
 	time.Sleep(timeout)
-
-	return s.sendBack(ctx, requestUUID)
+	return
 }
 
 // NewService ...
-func NewService(
-	sendBack func(ctx context.Context, requestUUID string) error,
-) *Service {
-	return &Service{
-		sendBack: sendBack,
-	}
+func NewService() *Service {
+	return &Service{}
 }

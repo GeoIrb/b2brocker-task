@@ -1,0 +1,3 @@
+test:
+	docker run --rm -d -p 15672:15672 -p 5672:5672 --name b2bbroker-task-mq rabbitmq:3-management
+	go test ./...
