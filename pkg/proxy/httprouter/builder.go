@@ -1,4 +1,4 @@
-package httpserver
+package httprouter
 
 import (
 	"net/http"
@@ -12,8 +12,8 @@ const (
 	handlerURI        = "/handler"
 )
 
-// NewServer return http server
-func NewServer(svc service, logger log.Logger) *fasthttprouter.Router {
+// New return http server for proxy service
+func New(svc service, logger log.Logger) *fasthttprouter.Router {
 	router := fasthttprouter.New()
 
 	router.Handle(handlerHTTPMethod, handlerURI, NewHandlerServer(svc, NewHandlerTransport(), ErrorProcessing, logger))

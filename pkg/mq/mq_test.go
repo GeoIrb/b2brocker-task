@@ -33,7 +33,7 @@ func TestQueue(t *testing.T) {
 	send, err := mq.Publisher(testQueue)
 	assert.NoError(t, err, "publisher")
 
-	err = send(testMessage)
+	err = send(context.Background(), testMessage)
 	assert.NoError(t, err, "send message")
 
 	err = mq.Consumer(testQueue, testHandler(t))
@@ -46,7 +46,7 @@ func TestQueue(t *testing.T) {
 }
 
 func testHandler(t *testing.T) Handler {
-	return func(data []byte) {
+	return func(ctx context.Context, data []byte) {
 		assert.Equal(t, testMessage, data)
 	}
 }

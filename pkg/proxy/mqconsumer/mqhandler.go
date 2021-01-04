@@ -15,12 +15,12 @@ type service interface {
 
 type handlerServer struct {
 	srv       service
-	transport handlerTransport
+	transport HandlerTransport
 
 	logger log.Logger
 }
 
-func (s *handlerServer) ServeMQ(data []byte) {
+func (s *handlerServer) ServeMQ(ctx context.Context, data []byte) {
 	level.Info(s.logger).Log("msg", "service message from mq", "message", string(data))
 
 	uuid, err := s.transport.Decode(data)
@@ -30,13 +30,13 @@ func (s *handlerServer) ServeMQ(data []byte) {
 	}
 
 	level.Error(s.logger).Log("msg", "proxy", "uuid", uuid)
-	s.srv.Compliter(context.Background(), uuid)
+	s.srv.Compliter(ctx, uuid)
 }
 
 // NewHandlerServer ...
 func NewHandlerServer(
 	src service,
-	transport handlerTransport,
+	transport HandlerTransport,
 	logger log.Logger,
 ) mq.Handler {
 	srv := &handlerServer{

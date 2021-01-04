@@ -8,13 +8,15 @@ import (
 )
 
 // PublishFunction for publish message to mq.
-type PublishFunction func(data []byte) error
+type PublishFunction func(ctx context.Context, data []byte) error
 
 // Handler message from mq.
-type Handler func(data []byte)
+type Handler func(ctx context.Context, data []byte)
 
 // Consumer mq.
-type Consumer struct {
+type Consumer map[string]consume
+
+type consume struct {
 	delivery <-chan amqp.Delivery
 	handler  Handler
 }
@@ -24,7 +26,7 @@ type RabbitMQ struct {
 	connection *amqp.Connection
 	channel    *amqp.Channel
 
-	queue map[string]Consumer
+	queue Consumer
 }
 
 // Publisher creates queue with queueName and returns publish function
@@ -32,7 +34,7 @@ func (q *RabbitMQ) Publisher(queueName string) (publish PublishFunction, err err
 	if _, err = q.channel.QueueDeclare(queueName, true, false, false, false, nil); err != nil {
 		return
 	}
-	publish = func(data []byte) error {
+	publish = func(ctx context.Context, data []byte) error {
 		return q.channel.Publish("", queueName, false, false, amqp.Publishing{
 			DeliveryMode: amqp.Persistent,
 			ContentType:  "text/plain",
@@ -62,7 +64,7 @@ func (q *RabbitMQ) Listen(ctx context.Context) {
 				select {
 				case d, ok := <-consumer.delivery:
 					if ok {
-						consumer.handler(d.Body)
+						consumer.handler(ctx, d.Body)
 						continue
 					}
 					return

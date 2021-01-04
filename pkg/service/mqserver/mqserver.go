@@ -21,7 +21,7 @@ type handlerServer struct {
 	logger log.Logger
 }
 
-func (s *handlerServer) ServeMQ(data []byte) {
+func (s *handlerServer) ServeMQ(ctx context.Context, data []byte) {
 	level.Info(s.logger).Log("msg", "service message from mq", "message", string(data))
 
 	uuid, err := s.transport.Decode(data)
@@ -31,7 +31,7 @@ func (s *handlerServer) ServeMQ(data []byte) {
 	}
 
 	level.Info(s.logger).Log("msg", "service message from mq", "uuid", uuid)
-	if err := s.srv.Handler(context.Background(), uuid); err != nil {
+	if err := s.srv.Handler(ctx, uuid); err != nil {
 		level.Error(s.logger).Log("msg", "service handle message from mq", "err", err)
 		return
 	}
@@ -42,7 +42,7 @@ func (s *handlerServer) ServeMQ(data []byte) {
 		return
 	}
 
-	if err = s.publishFunction(message); err != nil {
+	if err = s.publishFunction(ctx, message); err != nil {
 		level.Error(s.logger).Log("msg", "service publish message to mq", "err", err)
 		return
 	}

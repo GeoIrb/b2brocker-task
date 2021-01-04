@@ -1,4 +1,4 @@
-package httpserver
+package httprouter
 
 import (
 	"github.com/valyala/fasthttp"

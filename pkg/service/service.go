@@ -18,7 +18,7 @@ func (s *Service) Handler(ctx context.Context, requestUUID string) (err error) {
 	return
 }
 
-// NewService ...
-func NewService() *Service {
+// New load service
+func New() *Service {
 	return &Service{}
 }
