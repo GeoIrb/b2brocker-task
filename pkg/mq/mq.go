@@ -7,33 +7,30 @@ import (
 	"github.com/streadway/amqp"
 )
 
+type consume struct {
+	delivery <-chan amqp.Delivery
+	handler  Handler
+}
+
 // PublishFunction for publish message to mq.
 type PublishFunction func(ctx context.Context, data []byte) error
 
 // Handler message from mq.
 type Handler func(ctx context.Context, data []byte)
 
-// Consumer mq.
-type Consumer map[string]consume
-
-type consume struct {
-	delivery <-chan amqp.Delivery
-	handler  Handler
-}
-
 // RabbitMQ message queue.
 type RabbitMQ struct {
+	ctx    context.Context
+	cancel context.CancelFunc
+
 	connection *amqp.Connection
 	channel    *amqp.Channel
 
-	queue Consumer
+	queue map[string]consume
 }
 
 // Publisher creates queue with queueName and returns publish function
 func (q *RabbitMQ) Publisher(queueName string) (publish PublishFunction, err error) {
-	if _, err = q.channel.QueueDeclare(queueName, true, false, false, false, nil); err != nil {
-		return
-	}
 	publish = func(ctx context.Context, data []byte) error {
 		return q.channel.Publish("", queueName, false, false, amqp.Publishing{
 			DeliveryMode: amqp.Persistent,
@@ -50,25 +47,26 @@ func (q *RabbitMQ) Consumer(queueName string, handler Handler) (err error) {
 		return fmt.Errorf("queue is exist")
 	}
 
-	c := Consumer{handler: handler}
+	c := consume{handler: handler}
 	c.delivery, err = q.channel.Consume(queueName, "", true, false, false, false, nil)
 	q.queue[queueName] = c
 	return
 }
 
-// Listen starts listening message queue
-func (q *RabbitMQ) Listen(ctx context.Context) {
+// ListenAndServe starts listening message queue and serves them
+func (q *RabbitMQ) ListenAndServe() {
+	q.ctx, q.cancel = context.WithCancel(context.Background())
 	for _, consumer := range q.queue {
-		go func(consumer Consumer) {
+		go func(consume consume) {
 			for {
 				select {
-				case d, ok := <-consumer.delivery:
+				case d, ok := <-consume.delivery:
 					if ok {
-						consumer.handler(ctx, d.Body)
+						consume.handler(q.ctx, d.Body)
 						continue
 					}
 					return
-				case <-ctx.Done():
+				case <-q.ctx.Done():
 					return
 				}
 			}
@@ -76,17 +74,19 @@ func (q *RabbitMQ) Listen(ctx context.Context) {
 	}
 }
 
-// Disconnect disconnect from message queue.
-func (q *RabbitMQ) Disconnect() {
-	q.channel.Close()
-	q.connection.Close()
-	return
+// Shoutdown stops listenning and disconnect from message queue.
+func (q *RabbitMQ) Shoutdown() error {
+	q.cancel()
+	if err := q.channel.Close(); err != nil {
+		return err
+	}
+	return q.connection.Close()
 }
 
 // NewRabbitMQ ...
 func NewRabbitMQ(url string) (q *RabbitMQ, err error) {
 	q = &RabbitMQ{
-		queue: make(map[string]Consumer),
+		queue: make(map[string]consume),
 	}
 	if q.connection, err = amqp.Dial(url); err == nil {
 		if q.channel, err = q.connection.Channel(); err == nil {

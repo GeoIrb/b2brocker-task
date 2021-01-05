@@ -13,7 +13,7 @@ type service interface {
 	Handler(ctx context.Context) (uuid string, err error)
 }
 
-type handlerServer struct {
+type proxyHandlerServer struct {
 	src             service
 	transport       HandlerTransport
 	errorProcessing errorProcessing
@@ -21,7 +21,7 @@ type handlerServer struct {
 	logger log.Logger
 }
 
-func (s *handlerServer) ServeHTTP(ctx *fasthttp.RequestCtx) {
+func (s *proxyHandlerServer) ServeHTTP(ctx *fasthttp.RequestCtx) {
 	level.Info(s.logger).Log("msg", "http request", "host", ctx.Request.Host())
 
 	var (
@@ -41,15 +41,15 @@ func (s *handlerServer) ServeHTTP(ctx *fasthttp.RequestCtx) {
 	}
 }
 
-// NewHandlerServer ...
-func NewHandlerServer(
+// NewProxyHandler ...
+func NewProxyHandler(
 	src service,
 	transport HandlerTransport,
 	errorProcessing errorProcessing,
 
 	logger log.Logger,
 ) fasthttp.RequestHandler {
-	srv := &handlerServer{
+	srv := &proxyHandlerServer{
 		src:             src,
 		transport:       transport,
 		errorProcessing: errorProcessing,

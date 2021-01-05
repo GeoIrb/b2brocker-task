@@ -16,6 +16,6 @@ const (
 func New(svc service, logger log.Logger) *fasthttprouter.Router {
 	router := fasthttprouter.New()
 
-	router.Handle(handlerHTTPMethod, handlerURI, NewHandlerServer(svc, NewHandlerTransport(), ErrorProcessing, logger))
+	router.Handle(handlerHTTPMethod, handlerURI, NewProxyHandler(svc, NewHandlerTransport(), ErrorProcessing, logger))
 	return router
 }

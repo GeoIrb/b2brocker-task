@@ -22,13 +22,13 @@ func TestConnect(t *testing.T) {
 	assert.NotNil(t, mq, "connect to mq")
 	assert.NotNil(t, mq.connection, "connect to mq: connection")
 	assert.NotNil(t, mq.channel, "connect to mq: channel")
-	mq.Disconnect()
+	mq.Shoutdown()
 }
 
 func TestQueue(t *testing.T) {
 	mq, err := NewRabbitMQ(testURL)
 	assert.NoError(t, err, "connect to mq")
-	defer mq.Disconnect()
+	defer mq.Shoutdown()
 
 	send, err := mq.Publisher(testQueue)
 	assert.NoError(t, err, "publisher")
@@ -42,7 +42,7 @@ func TestQueue(t *testing.T) {
 	err = mq.Consumer(testQueue, testHandler(t))
 	assert.Error(t, err, "add consumer for existing queue")
 
-	mq.Listen(context.Background())
+	mq.ListenAndServe()
 }
 
 func testHandler(t *testing.T) Handler {

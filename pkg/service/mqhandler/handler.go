@@ -1,4 +1,4 @@
-package mqserver
+package mqhandler
 
 import (
 	"context"
@@ -15,7 +15,7 @@ type service interface {
 
 type handlerServer struct {
 	srv             service
-	transport       handlerTransport
+	transport       HandlerTransport
 	publishFunction mq.PublishFunction
 
 	logger log.Logger
@@ -51,7 +51,7 @@ func (s *handlerServer) ServeMQ(ctx context.Context, data []byte) {
 // NewHandlerServer ...
 func NewHandlerServer(
 	srv service,
-	transport handlerTransport,
+	transport HandlerTransport,
 	publishFunction mq.PublishFunction,
 	logger log.Logger,
 ) mq.Handler {

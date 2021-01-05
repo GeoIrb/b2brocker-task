@@ -1,4 +1,4 @@
-package mqserver
+package mqhandler
 
 import (
 	"encoding/json"
@@ -12,6 +12,7 @@ type HandlerMessage struct {
 // HandlerTransport mq transport
 type HandlerTransport interface {
 	Decode(data []byte) (UUID string, err error)
+	Encode(uuid string) (message []byte, err error)
 }
 
 type handlerTransport struct{}
@@ -31,7 +32,7 @@ func (t *handlerTransport) Encode(uuid string) (message []byte, err error) {
 	return json.Marshal(req)
 }
 
-// NewTransport ...
-func NewTransport() HandlerTransport {
+// NewHandlerTransport ...
+func NewHandlerTransport() HandlerTransport {
 	return &handlerTransport{}
 }

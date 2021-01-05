@@ -8,15 +8,13 @@ import (
 	"github.com/go-kit/kit/log"
 	"github.com/go-kit/kit/log/level"
 	"github.com/kelseyhightower/envconfig"
-	"github.com/valyala/fasthttp"
 
 	"b2broker-task/pkg/mq"
-	"b2broker-task/pkg/proxy"
-	"b2broker-task/pkg/proxy/httprouter"
-	"b2broker-task/pkg/proxy/mqhandler"
+	"b2broker-task/pkg/service"
+	"b2broker-task/pkg/service/mqhandler"
 )
 
-const serviceName = "proxy-service"
+const serviceName = "service"
 
 type configuration struct {
 	Port string `envconfig:"PORT" default:"8080"`
@@ -46,29 +44,16 @@ func main() {
 		level.Error(logger).Log("msg", "Rabbit MQ publisher", "queue", cfg.MQQueueToProxy, "err", err)
 		os.Exit(1)
 	}
-	svc := proxy.New(toServicePublish)
-
-	router := httprouter.New(svc, logger)
-
-	server := &fasthttp.Server{
-		Handler: router.Handler,
-	}
-
-	go func() {
-		level.Info(logger).Log("msg", "http server turn on", "port", cfg.Port)
-		if err := server.ListenAndServe(":" + cfg.Port); err != nil {
-			level.Error(logger).Log("msg", "http server turn on", "err", err)
-			os.Exit(1)
-		}
-	}()
+	svc := service.New()
 
 	handler := mqhandler.NewHandlerServer(
 		svc,
-		mqhandler.NewTransport(),
+		mqhandler.NewHandlerTransport(),
+		toServicePublish,
 		logger,
 	)
-	if err := rabbitMQ.Consumer(cfg.MQQueueToProxy, handler); err != nil {
-		level.Error(logger).Log("msg", "add consumer", "queue", cfg.MQQueueToProxy, "err", err)
+	if err := rabbitMQ.Consumer(cfg.MQQueueToService, handler); err != nil {
+		level.Error(logger).Log("msg", "add consumer", "queue", cfg.MQQueueToService, "err", err)
 		os.Exit(1)
 	}
 
@@ -83,9 +68,5 @@ func main() {
 
 	if err := rabbitMQ.Shoutdown(); err != nil {
 		level.Info(logger).Log("msg", "mq shoutdown", "err", err)
-	}
-
-	if err := server.Shutdown(); err != nil {
-		level.Info(logger).Log("msg", "http server shoutdown", "err", err)
 	}
 }

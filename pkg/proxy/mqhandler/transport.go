@@ -1,4 +1,4 @@
-package mqserver
+package mqhandler
 
 import (
 	"encoding/json"
