@@ -1,6 +1,6 @@
 # B2Broker-task
 
-## Задание
+## Task
 
 Есть сервис (service), общение с которым происходит через rabbitmq. В rabbit есть 2 очереди.
 Из первой service вычитывает все сообщения, а во вторую пишет ответ на сообщение.
@@ -23,11 +23,14 @@ Url запроса не важен, как и его метод
 Можно использовать любые библиотеки, кроме тех, которые уже реализуют функционал
 проксирования http в mq
 
+# Proxy API
+
+[API](cmd/proxy/API.md)
 
 # Todo 
 
 - [ ] Debug
 - [ ] Tests
-- [ ] Describe API
+- [ ] Describe proxy API
 - [ ] Create queues at start RabbitMQ container 
 - [ ] Review
