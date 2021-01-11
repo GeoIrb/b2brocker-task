@@ -60,12 +60,8 @@ func (q *RabbitMQ) ListenAndServe() {
 		go func(consume consume) {
 			for {
 				select {
-				case d, ok := <-consume.delivery:
-					if ok {
-						consume.handler(q.ctx, d.Body)
-						continue
-					}
-					return
+				case d := <-consume.delivery:
+					consume.handler(q.ctx, d.Body)
 				case <-q.ctx.Done():
 					return
 				}

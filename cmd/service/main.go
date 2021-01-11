@@ -17,8 +17,6 @@ import (
 const serviceName = "service"
 
 type configuration struct {
-	Port string `envconfig:"PORT" default:"8080"`
-
 	MQurl            string `envconfig:"MQ_URL" default:"amqp://guest:guest@localhost:5672/"`
 	MQQueueToService string `envconfig:"MQ_QUEUE_TO_SERVICE" default:"to-service"`
 	MQQueueToProxy   string `envconfig:"MQ_QUEUE_TO_PROXY" default:"to-proxy"`
@@ -58,15 +56,11 @@ func main() {
 	}
 
 	go func() {
-		level.Info(logger).Log("msg", "mq server turn on", "port", cfg.Port)
+		level.Info(logger).Log("msg", "mq server turn on")
 		rabbitMQ.ListenAndServe()
 	}()
 
 	c := make(chan os.Signal, 1)
 	signal.Notify(c, syscall.SIGTERM, syscall.SIGINT)
 	level.Info(logger).Log("msg", "received signal, exiting signal", "signal", <-c)
-
-	if err := rabbitMQ.Shoutdown(); err != nil {
-		level.Info(logger).Log("msg", "mq shoutdown", "err", err)
-	}
 }

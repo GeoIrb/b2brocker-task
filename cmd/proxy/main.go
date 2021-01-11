@@ -51,7 +51,8 @@ func main() {
 	router := httprouter.New(svc, logger)
 
 	server := &fasthttp.Server{
-		Handler: router.Handler,
+		Handler:          router.Handler,
+		DisableKeepalive: true,
 	}
 
 	go func() {
@@ -73,7 +74,7 @@ func main() {
 	}
 
 	go func() {
-		level.Info(logger).Log("msg", "mq server turn on", "port", cfg.Port)
+		level.Info(logger).Log("msg", "mq server turn on")
 		rabbitMQ.ListenAndServe()
 	}()
 
