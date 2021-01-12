@@ -14,7 +14,7 @@ func (s *Service) Handler(ctx context.Context, requestUUID string) (err error) {
 	for _, s := range requestUUID {
 		timeout += time.Duration(s)
 	}
-	time.Sleep(timeout)
+	time.Sleep(timeout * time.Millisecond)
 	return
 }
 

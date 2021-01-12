@@ -1,3 +1,5 @@
+DOCKER_IP=172.17.0.1
+
 test:
 	docker run --rm -d -p 15672:15672 -p 5672:5672 --name b2bbroker-task-mq rabbitmq:3-management
 	go test ./...
@@ -17,7 +19,7 @@ build-images:
 run:
 	docker run --rm -d -p 15672:15672 -p 5672:5672 --name b2broker-task-mq b2broker-task-mq 
 	@sleep 10s
-	docker run --rm -d -e MQ_URL=amqp://guest:guest@172.17.0.1:5672/ -e PORT=8080 -p 8080:8080 --name b2broker-task-proxy b2broker-task-proxy 
-	docker run --rm -d -e MQ_URL=amqp://guest:guest@172.17.0.1:5672/ --name b2broker-task-service b2broker-task-service
+	docker run --rm -d -e MQ_URL=amqp://guest:guest@$(DOCKER_IP):5672/ -e PORT=8080 -p 8080:8080 --name b2broker-task-proxy b2broker-task-proxy 
+	docker run --rm -d -e MQ_URL=amqp://guest:guest@$(DOCKER_IP):5672/ --name b2broker-task-service b2broker-task-service
 stop:
 	docker stop b2broker-task-mq b2broker-task-proxy b2broker-task-service
