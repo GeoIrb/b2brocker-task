@@ -43,7 +43,7 @@ func main() {
 	}
 	toServicePublish, err := rabbitMQ.Publisher(cfg.MQQueueToService)
 	if err != nil {
-		level.Error(logger).Log("msg", "Rabbit MQ publisher", "queue", cfg.MQQueueToProxy, "err", err)
+		level.Error(logger).Log("msg", "Rabbit MQ publisher", "queue", cfg.MQQueueToService, "err", err)
 		os.Exit(1)
 	}
 	svc := proxy.New(toServicePublish)

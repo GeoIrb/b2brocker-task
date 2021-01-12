@@ -37,7 +37,7 @@ func main() {
 		level.Error(logger).Log("msg", "connect to Rabbit MQ", "url", cfg.MQurl, "err", err)
 		os.Exit(1)
 	}
-	toServicePublish, err := rabbitMQ.Publisher(cfg.MQQueueToService)
+	toServicePublish, err := rabbitMQ.Publisher(cfg.MQQueueToProxy)
 	if err != nil {
 		level.Error(logger).Log("msg", "Rabbit MQ publisher", "queue", cfg.MQQueueToProxy, "err", err)
 		os.Exit(1)

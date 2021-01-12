@@ -23,14 +23,36 @@ Url запроса не важен, как и его метод
 Можно использовать любые библиотеки, кроме тех, которые уже реализуют функционал
 проксирования http в mq
 
+# Start 
+
+Start RabbitMQ
+```
+  docker run --rm -d -p 15672:15672 -p 5672:5672 --name b2bbroker-task-mq rabbitmq:3-management
+```
+Go on `localhost:15672` and create queues: 
+- `to-service`
+- `to-proxy`
+
+Start proxy
+```
+  go run cmd/proxy/main.go
+```
+
+Start service
+```
+  go run cmd/service/main.go
+```
 # Proxy API
 
 [API](cmd/proxy/API.md)
 
 # Todo 
 
-- [ ] Debug
-- [ ] Tests
-- [ ] Describe proxy API
+- [X] Debug
+- [X] Tests
+  - [X] MQ
+- [X] Build images
 - [ ] Create queues at start RabbitMQ container 
+- [ ] Start with docker
+- [X] Describe proxy API
 - [ ] Review
