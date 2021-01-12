@@ -15,8 +15,9 @@ build-images:
 	docker build -t b2broker-task-service -f build/service/Dockerfile .
 
 run:
-	docker run --rm -d -p 15672:15672 -p 5672:5672 --name b2broker-task-mq rabbitmq:3-management
-	docker run --rm -d -e PORT=8080 -p 8080:8080 --name b2broker-task-proxy b2broker-task-proxy 
-	docker run --rm -d -e --name b2broker-task-service b2broker-task-service
+	docker run --rm -d -p 15672:15672 -p 5672:5672 --name b2broker-task-mq b2broker-task-mq 
+	@sleep 10s
+	docker run --rm -d -e MQ_URL=amqp://guest:guest@172.17.0.1:5672/ -e PORT=8080 -p 8080:8080 --name b2broker-task-proxy b2broker-task-proxy 
+	docker run --rm -d -e MQ_URL=amqp://guest:guest@172.17.0.1:5672/ --name b2broker-task-service b2broker-task-service
 stop:
 	docker stop b2broker-task-mq b2broker-task-proxy b2broker-task-service
